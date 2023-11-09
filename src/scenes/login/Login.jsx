@@ -31,11 +31,11 @@ const Login = () => {
                 <Grid item>
                     <Paper sx={{padding:"1.2em", borderRadius:"0.5em", backgroundColor:colors.primary[400]}}>
                         <Typography sx={{mt:1, mb:1}} variant="h2" fontWeight="bold" textAlign="center">JVPAYROLL</Typography>
-                        <Typography sx={{mt:1, mb:1, color: colors.blueAccent[500]}} variant="h3" textAlign="center">Sing In</Typography>
+                        <Typography sx={{mt:1, mb:1, color: colors.blueAccent[500]}} variant="h3" textAlign="center">Sign In</Typography>
                         <Box component="form" onSubmit={handleLogin}>
                             <TextField name='username' margin='normal' type='text' fullWidth label="User" sx={{mt:2, mb:1.5}} required onChange={handleInputChange}/>
                             <TextField name='password' margin='normal' type='password' fullWidth label="Password" sx={{mt:1.5, mb:1.5}} required onChange={handleInputChange}/>
-                            <Button fullWidth type="submit" variant='contained' sx={{mt:1.5, mb:3, backgroundColor: colors.greenAccent[500]}}>LogIn</Button>
+                            <Button fullWidth type="submit" variant='contained' sx={{mt:1.5, mb:3, backgroundColor: colors.greenAccent[500]}}>Sign In</Button>
                             <Button component={Link} to="/createAccount" sx={{color: colors.blueAccent[300]}}>
                                 Create an account
                             </Button>

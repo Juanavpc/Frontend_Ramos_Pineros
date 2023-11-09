@@ -16,6 +16,7 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import Calendar from "./scenes/calendar/calendar";
 import Login from './scenes/login/Login';
+import CreateAccount from "./scenes/createaccount/CreateAccount";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -28,7 +29,10 @@ function App() {
       <ColorModeContext.Provider value={colorMode}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <Login/>
+          <Routes>
+            <Route path="/login" element={<Login/>} />
+            <Route path="/createAccount" element={<CreateAccount />} />
+          </Routes>
         </ThemeProvider>
       </ColorModeContext.Provider> 
     );
@@ -39,7 +43,6 @@ function App() {
       <ColorModeContext.Provider value={colorMode}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <Login/>
           <div className="app">
             <Sidebar isSidebar={isSidebar} />
             <main className="content">
