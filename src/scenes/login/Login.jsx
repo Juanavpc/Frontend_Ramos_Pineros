@@ -3,15 +3,16 @@ import React, { Component, useState } from 'react';
 import { Typography, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
 import { Link } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
+    const navigate = useNavigate();
     const [form, setForm] = useState(
         {
             username : '',
             password : '',
-            redirecToDashboard: false,
         }
     )
 
@@ -22,7 +23,7 @@ const Login = () => {
     const handleLogin = (e) => {
         e.preventDefault();
         console.log(form);
-        setForm({redirecToDashboard:true});
+        navigate("/dashboard");
     }
 
     return (

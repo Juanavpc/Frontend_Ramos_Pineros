@@ -12,7 +12,7 @@ const CreateAccount = () => {
             name : '',
             email : '',
             password: '',
-            redirecToDashboard: false,
+            role: '',
         }
     )
 
@@ -23,7 +23,14 @@ const CreateAccount = () => {
     const handleLogin = (e) => {
         e.preventDefault();
         console.log(form);
-        setForm({redirecToDashboard:true});
+
+        // Clear the form fields after submitting
+        setForm({
+            name: '',
+            email: '',
+            password: '',
+            role: '', // Also reset the role field
+        });
     }
 
     return (
@@ -34,18 +41,21 @@ const CreateAccount = () => {
                         <Typography sx={{mt:1, mb:1}} variant="h2" fontWeight="bold" textAlign="center">JVPAYROLL</Typography>
                         <Typography sx={{mt:1, mb:1, color: colors.blueAccent[500]}} variant="h3" textAlign="center">Sign Up</Typography>
                         <Box component="form" onSubmit={handleLogin}>
-                            <TextField name='name' margin='normal' type='text' fullWidth label="Name" sx={{mt:2, mb:1.5}} required onChange={handleInputChange}/>
-                            <TextField name='email' margin='normal' type='email' fullWidth label="Email" sx={{mt:1.5, mb:1.5}} required onChange={handleInputChange}/>
-                            <TextField name='password' margin='normal' type='password' fullWidth label="Password" sx={{mt:1.5, mb:1.5}} required onChange={handleInputChange}/>
+                            <TextField name='name' margin='normal' type='text' fullWidth label="Name" sx={{mt:2, mb:1.5}} required onChange={handleInputChange} value={form.name}/>
+                            <TextField name='email' margin='normal' type='email' fullWidth label="Email" sx={{mt:1.5, mb:1.5}} required onChange={handleInputChange} value={form.email}/>
+                            <TextField name='password' margin='normal' type='password' fullWidth label="Password" sx={{mt:1.5, mb:1.5}} required onChange={handleInputChange} value={form.password}/>
                             <FormControl sx={{mt:1, mb:1, minWidth: 550 }} size="small">
                                 <InputLabel id="demo-select-small-label">Role</InputLabel>
                                     <Select
                                         labelId="demo-select-small-label"
                                         id="demo-select-small"
                                         label="Role"
+                                        name='role'
+                                        value={form.role}
+                                        onChange={handleInputChange}
                                     >
                                         <MenuItem value="">
-                                        <em>None</em>
+                                            <em>None</em>
                                         </MenuItem>
                                         <MenuItem value={10}>Admin</MenuItem>
                                         <MenuItem value={20}>Cortador</MenuItem>

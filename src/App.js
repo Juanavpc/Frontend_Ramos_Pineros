@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
 import Dashboard from "./scenes/dashboard";
@@ -32,6 +32,8 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login/>} />
             <Route path="/createAccount" element={<CreateAccount />} />
+            <Route path="/" element={<Navigate to="/login" />} />
+            <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </ThemeProvider>
       </ColorModeContext.Provider> 
