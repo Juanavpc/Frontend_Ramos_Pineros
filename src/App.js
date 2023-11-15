@@ -17,12 +17,13 @@ import { ColorModeContext, useMode } from "./theme";
 import Calendar from "./scenes/calendar/calendar";
 import Login from './scenes/login/Login';
 import CreateAccount from "./scenes/createaccount/CreateAccount";
+import Productions from "./scenes/productions";
 
 function App() {
   const [theme, colorMode] = useMode();
   console.log(theme, colorMode)
   const [isSidebar, setIsSidebar] = useState(true);
-  const isLoggedIn = false;
+  const isLoggedIn = true;
 
   if (!isLoggedIn) {
     return (
@@ -53,6 +54,7 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/team" element={<Team />} />
                 <Route path="/contacts" element={<Contacts />} />
+                <Route path="/productions" element={<Productions />} />
                 <Route path="/invoices" element={<Invoices />} />
                 <Route path="/form" element={<Form />} />
                 <Route path="/bar" element={<Bar />} />
