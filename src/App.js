@@ -1,75 +1,57 @@
 import { useState } from "react";
-import { Navigate, Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
 import Dashboard from "./scenes/dashboard";
 import Team from "./scenes/team";
 import Invoices from "./scenes/invoices";
 import Contacts from "./scenes/contacts";
-import Bar from "./scenes/bar";
-import Form from "./scenes/form";
-import Line from "./scenes/line";
-import Pie from "./scenes/pie";
-import FAQ from "./scenes/faq";
-import Geography from "./scenes/geography";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
-import Calendar from "./scenes/calendar/calendar";
 import Login from './scenes/login/Login';
 import CreateAccount from "./scenes/createaccount/CreateAccount";
 import Productions from "./scenes/productions";
+import authService from './services/authService';
 
 function App() {
   const [theme, colorMode] = useMode();
-  console.log(theme, colorMode)
   const [isSidebar, setIsSidebar] = useState(true);
-  const isLoggedIn = true;
 
-  if (!isLoggedIn) {
-    return (
-      <ColorModeContext.Provider value={colorMode}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Routes>
-            <Route path="/login" element={<Login/>} />
-            <Route path="/createAccount" element={<CreateAccount />} />
-            <Route path="/" element={<Navigate to="/login" />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-          </Routes>
-        </ThemeProvider>
-      </ColorModeContext.Provider> 
-    );
-    
-    
-  } else {
-    return (
-      <ColorModeContext.Provider value={colorMode}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <div className="app">
-            <Sidebar isSidebar={isSidebar} />
-            <main className="content">
-              <Topbar setIsSidebar={setIsSidebar} />
-              <Routes>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/team" element={<Team />} />
-                <Route path="/contacts" element={<Contacts />} />
-                <Route path="/productions" element={<Productions />} />
-                <Route path="/invoices" element={<Invoices />} />
-                <Route path="/form" element={<Form />} />
-                <Route path="/bar" element={<Bar />} />
-                <Route path="/pie" element={<Pie />} />
-                <Route path="/line" element={<Line />} />
-                <Route path="/faq" element={<FAQ />} />
-                <Route path="/calendar" element={<Calendar />} />
-                <Route path="/geography" element={<Geography />} />
-              </Routes>
-            </main>
-          </div>
-        </ThemeProvider>
-      </ColorModeContext.Provider>
-    );
-  }
+  const isLoggedIn = authService.isAuthenticated(); // Verifica si el usuario está autenticado
+
+  return (
+    <ColorModeContext.Provider value={colorMode}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <div className="app">
+          {isLoggedIn && <Sidebar isSidebar={isSidebar} />} {/* Mostrar la barra lateral solo si está autenticado */}
+          <main className="content">
+            {isLoggedIn && <Topbar setIsSidebar={setIsSidebar} />} {/* Mostrar la barra superior solo si está autenticado */}
+            <Routes>
+              {/* Rutas accesibles solo para usuarios autenticados */}
+              {isLoggedIn ? (
+                <>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/team" element={<Team />} />
+                  <Route path="/contacts" element={<Contacts />} />
+                  <Route path="/productions" element={<Productions />} />
+                  <Route path="/invoices" element={<Invoices />} />
+                  <Route path="*" element={<Navigate to="/" />} /> {/* Redirigir a la página principal en caso de ruta desconocida */}
+                </>
+              ) : (
+                <>
+                  {/* Rutas accesibles solo para usuarios no autenticados */}
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/createAccount" element={<CreateAccount />} />
+                  <Route path="*" element={<Navigate to="/login" />} /> {/* Redirigir a la página de inicio de sesión en caso de ruta desconocida */}
+                </>
+              )}
+            </Routes>
+          </main>
+        </div>
+      </ThemeProvider>
+    </ColorModeContext.Provider>
+  );
 }
 
 export default App;
