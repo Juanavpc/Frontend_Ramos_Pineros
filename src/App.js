@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
@@ -16,8 +16,12 @@ import authService from './services/authService';
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(authService.isAuthenticated());
 
-  const isLoggedIn = authService.isAuthenticated(); // Verifica si el usuario está autenticado
+  useEffect(() => {
+    setIsLoggedIn(authService.isAuthenticated());
+  }, []); 
+  console.log("isLoggedIn", isLoggedIn )
 
   return (
     <ColorModeContext.Provider value={colorMode}>

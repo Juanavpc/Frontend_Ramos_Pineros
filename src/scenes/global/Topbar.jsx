@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Box, IconButton, useTheme } from "@mui/material";
 import { useContext } from "react";
 import { ColorModeContext, tokens } from "../../theme";
@@ -7,12 +8,27 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LogoutIcon from '@mui/icons-material/Logout';
 import SearchIcon from "@mui/icons-material/Search";
 import authService from '../../services/authService';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 
 const Topbar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(authService.isAuthenticated());
+
+  useEffect(() => {
+    setIsLoggedIn(authService.isAuthenticated());
+  }, []); 
+
+
+  const handleLogout = () => {
+    authService.removeToken();
+    setIsLoggedIn(false); // Actualiza manualmente el estado después del cierre de sesión
+    navigate('/login');
+  };
+
 
   return (
     <Box display="flex" justifyContent="space-between" p={2}>
@@ -37,7 +53,7 @@ const Topbar = () => {
             <LightModeOutlinedIcon />
           )}
         </IconButton>
-        <IconButton onClick={authService.removeToken}>
+        <IconButton onClick={() => { authService.removeToken(); navigate("/login"); }}>
           <LogoutIcon />
         </IconButton>
       </Box>

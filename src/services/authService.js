@@ -47,6 +47,8 @@ const authService = {
   },
   saveToken: (token) => {
     localStorage.setItem(KEY_TOKEN, token);
+    window.dispatchEvent(new Event('storage')); // Disparar evento de cambio en el almacenamiento
+    window.location.reload(); 
   },
 
   getToken: () => {
@@ -55,13 +57,13 @@ const authService = {
 
   removeToken: () => {
     localStorage.removeItem(KEY_TOKEN);
+    window.dispatchEvent(new Event('storage')); // Disparar evento de cambio en el almacenamiento
+    window.location.reload(); 
   },
   isAuthenticated: () => {
     const token = localStorage.getItem(KEY_TOKEN);
     return !!token;
   },
-
-
 };
 
 export default authService;

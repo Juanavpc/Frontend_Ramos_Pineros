@@ -6,8 +6,10 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import Header from "../../components/Header";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import CloseIcon from '@mui/icons-material/Close';
+import userService from '../../services/userService';
+import authService from '../../services/authService';
 
 const Team = () => {
   const theme = useTheme();
@@ -15,6 +17,23 @@ const Team = () => {
   const [openEditModal, setOpenEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState("");
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+      const userList = await userService.getUsers();
+      console.log(userList)
+      setUsers(userList);
+    } catch (error) {
+      console.error('Error loading users:', error.message);
+    }
+  };
+
+
 
   const handleEditUserClick = () => {
     setOpenEditModal(true);
@@ -24,11 +43,29 @@ const Team = () => {
     setOpenEditModal(false);
   };
 
-  const handleEditUser = () => {
-    // Realiza la lógica de edición del producto aquí
-    console.log("User edited:");
-    handleCloseEditModal();
+  const handleEditUser = async () => {
+    try {
+      console.log(selectedUser)
+      await userService.editUser(selectedUser);
+
+      handleCloseEditModal();
+      loadUsers();
+    } catch (error) {
+      console.error('Error editing user:', error.message);
+    }
   };
+  
+  const handleDeleteUser = async () => {
+    try {
+      await userService.deleteUser(selectedUser.id);
+
+      handleCloseDeleteConfirmation();
+      loadUsers(); 
+    } catch (error) {
+      console.error('Error deleting user:', error.message);
+    }
+  };
+  
 
   const handleDeleteUserClick = () => {
     setOpenDeleteConfirmation(true);
@@ -38,16 +75,11 @@ const Team = () => {
     setOpenDeleteConfirmation(false);
   };
 
-  const handleDeleteUser = () => {
-    // Realiza la lógica de eliminación del producto aquí
-    console.log("User deleted:");
-    handleCloseDeleteConfirmation();
-  };
 
   const columns = [
     { field: "id", headerName: "ID" },
     {
-      field: "name",
+      field: "nombre",
       headerName: "Name",
       flex: 1,
       cellClassName: "name-column--cell",
@@ -58,19 +90,19 @@ const Team = () => {
       flex: 1,
     },
     {
-      field: "role",
+      field: "rol",
       headerName: "Role",
       flex: 1,
-      renderCell: ({ row: { access } }) => {
+      renderCell: ({ row: { rol } }) => {
         return (
           <Box
             width="60%"
           >
-            {access === "Cortador"}
-            {access === "Guarnecedor "}
-            {access === "Ensamblador"}
+            {rol == "cortador"}
+            {rol == "guarnecedor "}
+            {rol == "ensamblador"}
             <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
-              {access}
+              {rol.charAt(0).toUpperCase() + rol.slice(1)}
             </Typography>
           </Box>
         );
@@ -153,7 +185,7 @@ const Team = () => {
           },
         }}
       >
-        <DataGrid checkboxSelection rows={mockDataTeam} columns={columns} />
+        <DataGrid checkboxSelection rows={users} columns={columns} />
       </Box>
       
 
