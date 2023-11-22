@@ -4,27 +4,42 @@ import { Typography, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
 import { Link } from 'react-router-dom';
 import { Navigate, useNavigate } from 'react-router-dom';
+import authService from '../../services/authService';
 
 const Login = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const navigate = useNavigate();
-    const [form, setForm] = useState(
-        {
-            username : '',
-            password : '',
-        }
-    )
-
-    const handleInputChange = (e) =>{
-        setForm({...form, [e.target.name]:e.target.value});
-    }
-
-    const handleLogin = (e) => {
+    const [credentials, setCredentials] = useState({
+        password: "",
+      });
+    
+    const handleInputChange = (e) => {
+      console.log(e.target)
+        const { name, value } = e.target;
+        console.log(name, value)
+        setCredentials((prevCredentials) => ({
+          ...prevCredentials,
+          [name]: value,
+        }));
+      };
+    
+    const handleLogin = async (e) => {
         e.preventDefault();
-        console.log(form);
-        navigate("/dashboard");
-    }
+        try {
+            console.log(credentials)
+          const response = await authService.login(credentials);
+          console.log("Usuario autenticado:", response);
+          authService.saveToken(response.idToken);
+          navigate('/');
+         
+        } catch (error) {
+          console.error("Error al iniciar sesión:", error.message);
+         
+        }
+      };
+    
+
 
     return (
         <Container maxWidth='sm'>
@@ -34,7 +49,7 @@ const Login = () => {
                         <Typography sx={{mt:1, mb:1}} variant="h2" fontWeight="bold" textAlign="center">JVPAYROLL</Typography>
                         <Typography sx={{mt:1, mb:1, color: colors.blueAccent[500]}} variant="h3" textAlign="center">Sign In</Typography>
                         <Box component="form" onSubmit={handleLogin}>
-                            <TextField name='username' margin='normal' type='text' fullWidth label="User" sx={{mt:2, mb:1.5}} required onChange={handleInputChange}/>
+                            <TextField name='email' margin='normal' type='text' fullWidth label="User" sx={{mt:2, mb:1.5}} />
                             <TextField name='password' margin='normal' type='password' fullWidth label="Password" sx={{mt:1.5, mb:1.5}} required onChange={handleInputChange}/>
                             <Button fullWidth type="submit" variant='contained' sx={{mt:1.5, mb:3, backgroundColor: colors.greenAccent[500]}}>Sign In</Button>
                             <Button component={Link} to="/createAccount" sx={{color: colors.blueAccent[300]}}>

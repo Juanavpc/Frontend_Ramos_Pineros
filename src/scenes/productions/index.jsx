@@ -20,7 +20,7 @@ const Productions = () => {
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
   const [openNewConfirmation, setOpenNewConfirmation] = useState(false);
   // Asumiendo que tienes la información del rol del usuario en el contexto
-  const userRole = "admin"; // Reemplaza esto con la obtención real del rol del usuario
+  const userRole = "cortador"; // Reemplaza esto con la obtención real del rol del usuario
 
   const handleNewProductionClick = () => {
     setOpenNewConfirmation(true);
@@ -76,10 +76,11 @@ const Productions = () => {
     console.log("Production deleted:");
     handleCloseDeleteConfirmation();
   };
-
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
-    { field: "registrarId", headerName: "Id User"},
+    ...(userRole === "admin"
+      ? [{ field: "registrarId", headerName: "Id User" }]
+      : []),
     {
       field: "date",
       headerName: "Date",
