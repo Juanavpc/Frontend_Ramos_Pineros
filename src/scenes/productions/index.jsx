@@ -20,7 +20,7 @@ const Productions = () => {
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
   const [openNewConfirmation, setOpenNewConfirmation] = useState(false);
   // Asumiendo que tienes la información del rol del usuario en el contexto
-  const userRole = "cortador"; // Reemplaza esto con la obtención real del rol del usuario
+  const userRole = "admin"; // Reemplaza esto con la obtención real del rol del usuario
 
   const handleNewProductionClick = () => {
     setOpenNewConfirmation(true);

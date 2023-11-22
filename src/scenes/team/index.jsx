@@ -155,6 +155,7 @@ const Team = () => {
       >
         <DataGrid checkboxSelection rows={mockDataTeam} columns={columns} />
       </Box>
+      
 
         {/* Modal para editar usuario */}
         <Dialog open={openEditModal} onClose={handleCloseEditModal}>
