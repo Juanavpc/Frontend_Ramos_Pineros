@@ -56,11 +56,12 @@ const userService = {
     try {
       const token = localStorage.getItem(KEY_TOKEN);
 
-      const response = await fetch(`${API_BASE_URL}/usuarios/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/usuarios`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
         },
+        body: JSON.stringify({ userId }),
       });
 
       if (!response.ok) {

@@ -18,6 +18,11 @@ const Team = () => {
   const [selectedUser, setSelectedUser] = useState("");
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
   const [users, setUsers] = useState([]);
+  const [selectedRole, setSelectedRole] = useState("");
+  const [idUsers, setIdUsers] = useState({
+    id: "",
+  });
+  
 
   useEffect(() => {
     loadUsers();
@@ -33,9 +38,9 @@ const Team = () => {
     }
   };
 
-
-
-  const handleEditUserClick = () => {
+  const handleEditUserClick = (user) => {
+    setSelectedUser(user);
+    setSelectedRole(user.rol); // Establece el valor inicial del rol seleccionado
     setOpenEditModal(true);
   };
 
@@ -46,7 +51,7 @@ const Team = () => {
   const handleEditUser = async () => {
     try {
       console.log(selectedUser)
-      await userService.editUser(selectedUser);
+      await userService.editUser(selectedUser.id);
 
       handleCloseEditModal();
       loadUsers();
@@ -55,19 +60,23 @@ const Team = () => {
     }
   };
   
-  const handleDeleteUser = async () => {
+  const handleDeleteUser = async (e) => {
+    e.preventDefault();
     try {
-      await userService.deleteUser(selectedUser.id);
-
+      console.log("ID del usuario a eliminar:", idUsers.id);
+      const response = await userService.deleteUser(idUsers.id);
+      console.log("Usuario eliminado:", response);
+      loadUsers();  // Actualiza la lista de usuarios después de eliminar uno
       handleCloseDeleteConfirmation();
-      loadUsers(); 
     } catch (error) {
-      console.error('Error deleting user:', error.message);
+      console.error("Error al eliminar el usuario:", error.message);
     }
   };
-  
 
-  const handleDeleteUserClick = () => {
+  const handleDeleteUserClick = (user) => {
+    setSelectedUser(user);
+    setIdUsers({id: user.id})
+    console.log("ID del usuario a eliminar:", user.id);
     setOpenDeleteConfirmation(true);
   };
 
@@ -98,9 +107,9 @@ const Team = () => {
           <Box
             width="60%"
           >
-            {rol == "cortador"}
-            {rol == "guarnecedor "}
-            {rol == "ensamblador"}
+            {rol === "cortador"}
+            {rol === "guarnecedor "}
+            {rol === "ensamblador"}
             <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
               {rol.charAt(0).toUpperCase() + rol.slice(1)}
             </Typography>
@@ -112,7 +121,7 @@ const Team = () => {
       field: "action",
       headerName: "Action",
       flex: 1,
-      renderCell: () => {
+      renderCell: ({ row }) => {
         return (
           <Box
             width="100%"
@@ -142,7 +151,7 @@ const Team = () => {
               alignItems="center"
               backgroundColor={colors.greenAccent[600]}
               borderRadius="4px"
-              onClick={handleEditUserClick}
+              onClick={() => handleEditUserClick(row)}
               style={{ cursor: "pointer" }}
             >
               <EditIcon />
@@ -190,10 +199,12 @@ const Team = () => {
       
 
         {/* Modal para editar usuario */}
-        <Dialog open={openEditModal} onClose={handleCloseEditModal}>
+        <Dialog open={openEditModal} onClose={handleCloseEditModal} fullWidth maxWidth="sm">
         <DialogTitle>
           <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography sx={{mt:1, mb:1}} variant="h2" fontWeight="bold">Edit User</Typography>
+            <Typography sx={{ mt: 1, mb: 1 }} variant="h2" fontWeight="bold">
+              Edit User
+            </Typography>
             <IconButton onClick={handleCloseEditModal}>
               <CloseIcon />
             </IconButton>
@@ -201,36 +212,27 @@ const Team = () => {
         </DialogTitle>
         <Box p={3}>
           {/* Formulario para editar un usuario */}
-          <TextField
-            label="Name"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-          />
           <Select
-            value={selectedUser}
-            onChange={(e) => setSelectedUser(e.target.value)}
+            value={selectedRole}
+            onChange={(e) => setSelectedRole(e.target.value)}
             label="Role"
             fullWidth
             displayEmpty
             margin="normal"
             variant="outlined"
             required
-            sx={{ marginBottom: "8px" }}
+            sx={{ marginBottom: "16px" }}
           >
             <MenuItem value="" disabled>
               Role
             </MenuItem>
-            <MenuItem value="role1">Cortador</MenuItem>
-            <MenuItem value="role2">Ensamblador</MenuItem>
-            <MenuItem value="role3">Guarnecedor</MenuItem>
+            <MenuItem value={"administrador"}>Administrador</MenuItem>
+            <MenuItem value={"cortador"}>Cortador</MenuItem>
+            <MenuItem value={"ensamblador"}>Ensamblador</MenuItem>
+            <MenuItem value={"guarnecedor"}>Guarnecedor</MenuItem>
           </Select>
           <Box display="flex" justifyContent="center" mt={2}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleEditUser}
-            >
+            <Button variant="contained" color="primary" onClick={handleEditUser}>
               Save Changes
             </Button>
           </Box>
@@ -253,7 +255,7 @@ const Team = () => {
       </DialogTitle>
       <Box p={3}>
         <Typography>
-          Are you sure you want to delete the selected user?
+          Are you sure you want to delete the selected user ID:{idUsers.id}? 
         </Typography>
         <Box display="flex" justifyContent="center" marginTop="15px">
           <Button
