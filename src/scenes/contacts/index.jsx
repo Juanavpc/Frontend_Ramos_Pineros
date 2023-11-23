@@ -45,7 +45,7 @@ const Contacts = () => {
 
 
   useEffect(() => {
-    const userRole = authService.getUserData();
+    const userRole = authService.getUserData().rol;
     setIsAdmin(userRole === "administrador");
     loadProducts();
   }, []);
@@ -54,12 +54,12 @@ const Contacts = () => {
     try {
       const productList = await productService.getProducts();
       console.log("Original productList:", productList);
-      if(authService.getUserData()==="administrador"){
+      if(authService.getUserData().rol==="administrador"){
         setProducts(productList);
       }else{
         const filteredProducts = productList.filter((product) => {
           // Asegúrate de ajustar la lógica de acuerdo a tu estructura de datos
-          return product.rol === authService.getUserData();
+          return product.rol === authService.getUserData().rol;
         });
         console.log("Filtered productList:", filteredProducts);
         setProducts(filteredProducts);
@@ -242,7 +242,7 @@ const Contacts = () => {
         title="PRODUCTS"
         subtitle="List of products for Future Reference"
       />
-      {authService.getUserData() == "administrador" && ( // Mostrar el botón solo si el usuario es administrador
+      {authService.getUserData().rol == "administrador" && ( // Mostrar el botón solo si el usuario es administrador
         <Box mb="20px" display="flex" justifyContent="flex-end">
           <Button
             variant="contained"
