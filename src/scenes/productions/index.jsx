@@ -9,7 +9,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
-import { useState } from "react";
+import { useState,useEffect } from "react";
+import productionService from "../../services/productionService";
+import productService from "../../services/productService";
+import authService from "../../services/authService";
+
 
 const Productions = () => {
   const theme = useTheme();
@@ -21,8 +25,70 @@ const Productions = () => {
   const [openNewConfirmation, setOpenNewConfirmation] = useState(false);
   // Asumiendo que tienes la información del rol del usuario en el contexto
   const userRole = "cortador"; // Reemplaza esto con la obtención real del rol del usuario
+  const [products, setProducts] = useState([]);
+  const [productions, setProductions] = useState([]);
+  const [form, setForm] = useState(
+    {
+      produccion:{
+        id_usuario:0, 
+        cantidad: 0
+      },
+      detalle:{
+        id_producto:0,
+        nombre:""
+      }
+    }
+)
 
+  useEffect(() => {
+    loadProductions();
+    loadProducts();
+
+  }, []);
+
+  const handleInputChange = (section, property, value) => {
+    setForm((prevForm) => ({
+      ...prevForm,
+      [section]: {
+        ...prevForm[section],
+        [property]: value,
+      },
+    }));
+    console.log(form)
+  };
+
+  const loadProductions = async () => {
+    try {
+      const productionList = await productionService.getProductions();
+      console.log(productionList)
+      setProductions(productionList);
+      console.log(productionService.getProductions())
+    } catch (error) {
+      console.error('Error loading users:', error.message);
+    }
+  };
+
+  const loadProducts = async () => {
+    try {
+      const productList = await productService.getProducts();
+      console.log("Original productList:", productList);
+      if(authService.getUserData()==="administrador"){
+        setProducts(productList);
+      }else{
+        const filteredProducts = productList.filter((product) => {
+          // Asegúrate de ajustar la lógica de acuerdo a tu estructura de datos
+          return product.rol === authService.getUserData();
+        });
+        console.log("Filtered productList:", filteredProducts);
+        setProducts(filteredProducts);
+        console.log(products)
+      }      
+    } catch (error) {
+      console.error("Error loading products:", error.message);
+    }
+  };
   const handleNewProductionClick = () => {
+    loadProducts();
     setOpenNewConfirmation(true);
   };
 
@@ -82,30 +148,25 @@ const Productions = () => {
       ? [{ field: "registrarId", headerName: "Id User" }]
       : []),
     {
-      field: "date",
+      field: "fecha",
       headerName: "Date",
       flex: 1,
       cellClassName: "name-column--cell",
     },
     {
-      field: "quantity",
+      field: "cantidad",
       headerName: "Quantity",
       type: "number",
       headerAlign: "left",
       align: "left",
     },
     {
-      field: "price",
-      headerName: "Price",
-      flex: 1,
-    },
-    {
-        field: "status",
+        field: "estado",
         headerName: "Status",
         flex: 1,
     },
     {
-        field: "compensation",
+        field: "compensacion",
         headerName: "Compensation",
         flex: 1,
     },
@@ -144,7 +205,7 @@ const Productions = () => {
               width="100%"
               height="75%"
               display="flex"
-              justifyContent="space-between"
+              justifyContent="space-around"
               borderRadius="4px"
             >
               <Box
@@ -159,19 +220,6 @@ const Productions = () => {
                 style={{ cursor: "pointer" }}
               >
                 <DeleteOutlineIcon />
-              </Box>
-              <Box
-                width="30%"
-                p="5px"
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                backgroundColor={colors.greenAccent[600]}
-                borderRadius="4px"
-                onClick={handleEditProductionClick}
-                style={{ cursor: "pointer" }}
-              >
-                <EditIcon />
               </Box>
               <Box
                 width="30%"
@@ -245,7 +293,7 @@ const Productions = () => {
         }}
       >
         <DataGrid
-          rows={mockDataContacts}
+          rows={productions}
           columns={columns}
         />
       </Box>
@@ -299,15 +347,29 @@ const Productions = () => {
         <Box p={3}>
           {/* Formulario para crear nueva produccion */}
           <TextField
-            label="Quantity of products"
+            label="Production Name"
             variant="outlined"
             fullWidth
             margin="normal"
             sx={{ marginTop: "8px" }}
+            value={form.detalle.nombre}
+            required onChange={(e) => handleInputChange('detalle', 'nombre', e.target.value)}
+          />
+          <TextField
+            label="cantidad"
+            variant="outlined"
+            fullWidth
+            type='number'
+            inputMode="numeric"
+            pattern="[0-9]*"
+            margin="normal"
+            sx={{ marginTop: "8px" }}
+            value={form.produccion.cantidad}
+            required onChange={(e) => handleInputChange('produccion', 'cantidad', parseInt(e.target.value, 10) || 0)}
           />
           <Select
-            value={selectedProduction}
-            onChange={(e) => setSelectedProduction(e.target.value)}
+            value={form.detalle.id_producto}
+            onChange={(e) => handleInputChange('detalle', 'id_producto', parseInt(e.target.value, 10) || 0)}
             label="Product"
             fullWidth
             displayEmpty
@@ -319,18 +381,13 @@ const Productions = () => {
             <MenuItem value="" disabled>
               Product
             </MenuItem>
-            <MenuItem value="product1">Suela</MenuItem>
-            <MenuItem value="product2">Moño</MenuItem>
-            <MenuItem value="product3">Cuero</MenuItem>
+            {products.map((product) => (
+              
+              <MenuItem key={product.id} value={product.id}>
+                {product.name}
+              </MenuItem>
+            ))}
           </Select>
-          <TextField
-            label="Production Name"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            required
-            sx={{ marginTop: "0px" }}
-          />
           <Box display="flex" justifyContent="center" marginTop="12px">
             <Button
               variant="contained"
