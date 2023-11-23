@@ -1,7 +1,6 @@
 // productService.js
 
-const API_BASE_URL = "https://juanavpc.pythonanywhere.com" || "http://localhost:5000"; "https://tu-api.com"; // Reemplaza con la URL correcta de tu API
-
+const API_BASE_URL = "https://juanavpc.pythonanywhere.com" || "http://localhost:5000"; 
 const productService = {
   getProducts: async () => {
     try {
@@ -70,6 +69,30 @@ const productService = {
       throw new Error(`Error al eliminar el producto: ${error.message}`);
     }
   },
+  editProduct: async (editedProduct) => {
+    try {
+      console.log(editedProduct)
+      const token = localStorage.getItem('jwtToken');
+      const response = await fetch(`${API_BASE_URL}/productos`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editedProduct),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Error editing product");
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      throw new Error(`Error editing product: ${error.message}`);
+    }
+  },
+  
 };
 
 export default productService;

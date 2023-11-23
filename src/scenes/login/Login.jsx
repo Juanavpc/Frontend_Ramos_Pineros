@@ -11,6 +11,7 @@ const Login = () => {
     const colors = tokens(theme.palette.mode);
     const navigate = useNavigate();
     const [credentials, setCredentials] = useState({
+        username:"",
         password: "",
       });
 
@@ -50,7 +51,7 @@ const Login = () => {
                         <Typography sx={{mt:1, mb:1}} variant="h2" fontWeight="bold" textAlign="center">JVPAYROLL</Typography>
                         <Typography sx={{mt:1, mb:1, color: colors.blueAccent[500]}} variant="h3" textAlign="center">Sign In</Typography>
                         <Box component="form" onSubmit={handleLogin}>
-                            <TextField name='email' margin='normal' type='text' fullWidth label="User" sx={{mt:2, mb:1.5}} />
+                            <TextField name='username' margin='normal' type='text' fullWidth label="User" sx={{mt:2, mb:1.5}} required onChange={handleInputChange}/>
                             <TextField name='password' margin='normal' type='password' fullWidth label="Password" sx={{mt:1.5, mb:1.5}} required onChange={handleInputChange}/>
                             <Button fullWidth type="submit" variant='contained' sx={{mt:1.5, mb:3, backgroundColor: colors.greenAccent[500]}}>Sign In</Button>
                             <Button component={Link} to="/createAccount" sx={{color: colors.blueAccent[300]}}>

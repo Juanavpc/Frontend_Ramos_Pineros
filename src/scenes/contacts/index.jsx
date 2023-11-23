@@ -1,23 +1,75 @@
-import { Box, Button, Dialog, DialogTitle, IconButton, TextField, Typography, Select, MenuItem } from "@mui/material";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogTitle,
+  IconButton,
+  TextField,
+  Typography,
+  Select,
+  MenuItem,
+} from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import { mockDataContacts } from "../../data/mockData";
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import EditIcon from '@mui/icons-material/Edit';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import AddIcon from '@mui/icons-material/Add';
-import CloseIcon from '@mui/icons-material/Close';
-import { useState } from "react";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import EditIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import productService from "../../services/productService";
+import { useState, useEffect } from "react";
 
 const Contacts = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [openModal, setOpenModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState("");
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [editedProduct, setEditedProduct] = useState({
+    id: "",
+    nombre: "",
+    descripcion: "",
+    rol: "",
+    precio: 0,
+  });
+  const [deleteProduct, setDeleteProduct] = useState(0);
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const loadProducts = async () => {
+    try {
+      const productList = await productService.getProducts();
+      setProducts(productList);
+    } catch (error) {
+      console.error("Error loading products:", error.message);
+    }
+  };
+
+  const handleEditProductClick = (productId) => {
+    console.log(productId)
+    const productToEdit = products.find((product) => product.id === productId);
+    console.log(productToEdit)
+    setEditedProduct(productToEdit);
+    setOpenEditModal(true);
+  };
+  const handleEditProduct = async () => {
+    try {
+      console.log(editedProduct)
+      const editedProductResponse = await productService.editProduct(
+        editedProduct
+      );
+      console.log("Product edited:", editedProductResponse);
+      handleCloseEditModal();
+      // Actualiza la lista de productos después de la edición
+      loadProducts();
+    } catch (error) {
+      console.error('Error editing product:', error.message);
+    }
+  };
 
   const handleNewProductClick = () => {
     setOpenModal(true);
@@ -33,32 +85,34 @@ const Contacts = () => {
     handleCloseModal();
   };
 
-  const handleEditProductClick = () => {
-    setOpenEditModal(true);
-  };
-
   const handleCloseEditModal = () => {
     setOpenEditModal(false);
   };
 
-  const handleEditProduct = () => {
-    // Realiza la lógica de edición del producto aquí
-    console.log("Product edited:", selectedProduct);
-    handleCloseEditModal();
-  };
-
-  const handleDeleteProductClick = () => {
+  const handleDeleteProductClick = (productId) => {
+    console.log(productId);
+    setDeleteProduct(productId); // Almacena el ID del producto seleccionado
     setOpenDeleteConfirmation(true);
+  };
+  const handleDeleteProduct = async () => {
+    try {
+      console.log("Deleting product:", deleteProduct);
+      const deleteProductResponse = await productService.deleteProduct(
+        deleteProduct
+      );
+      console.log("Product edited:", deleteProductResponse);
+      handleCloseEditModal();
+
+      loadProducts();
+    } catch (error) {
+      console.error('Error deleting product:', error.message);
+    } finally {
+      handleCloseDeleteConfirmation();
+    }
   };
 
   const handleCloseDeleteConfirmation = () => {
     setOpenDeleteConfirmation(false);
-  };
-
-  const handleDeleteProduct = () => {
-    // Realiza la lógica de eliminación del producto aquí
-    console.log("Product deleted:", selectedProduct);
-    handleCloseDeleteConfirmation();
   };
 
 
@@ -68,37 +122,35 @@ const Contacts = () => {
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     {
-      field: "name",
+      field: "nombre",
       headerName: "Name",
       flex: 1,
       cellClassName: "name-column--cell",
     },
     {
-      field: "description",
+      field: "descripcion",
       headerName: "Description",
-      flex:1,
+      flex: 1,
     },
     {
-      field: "role",
+      field: "rol",
       headerName: "Role",
       flex: 1,
-      renderCell: ({ row: { access } }) => {
+      renderCell: ({ row: { rol } }) => {
         return (
-          <Box
-            width="60%"
-          >
-            {access === "Cortador"}
-            {access === "Guarnecedor "}
-            {access === "Ensamblador"}
+          <Box width="60%">
+            {rol === "cortador"}
+            {rol === "guarnecedor "}
+            {rol === "ensamblador"}
             <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
-              {access}
+              {rol}
             </Typography>
           </Box>
         );
       },
     },
     {
-      field: "price",
+      field: "precio",
       headerName: "Price",
       flex: 1,
       type: "number",
@@ -109,7 +161,7 @@ const Contacts = () => {
       field: "action",
       headerName: "Action",
       flex: 1,
-      renderCell: () => {
+      renderCell: ({ row: { id } }) => {
         return (
           <Box
             width="100%"
@@ -127,7 +179,7 @@ const Contacts = () => {
               alignItems="center"
               backgroundColor={colors.greenAccent[600]}
               borderRadius="4px"
-              onClick={handleDeleteProductClick}
+              onClick={()=>{handleDeleteProductClick(id)}}
               style={{ cursor: "pointer" }}
             >
               <DeleteOutlineIcon />
@@ -141,7 +193,7 @@ const Contacts = () => {
               alignItems="center"
               backgroundColor={colors.greenAccent[600]}
               borderRadius="4px"
-              onClick={handleEditProductClick}
+              onClick={() => handleEditProductClick(id)}
               style={{ cursor: "pointer" }}
             >
               <EditIcon />
@@ -203,17 +255,20 @@ const Contacts = () => {
           },
         }}
       >
-        <DataGrid
-          rows={mockDataContacts}
-          columns={columns}
-        />
+        <DataGrid rows={products} columns={columns} />
       </Box>
 
       {/* Modal para crear nuevo producto */}
       <Dialog open={openModal} onClose={handleCloseModal}>
         <DialogTitle>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography sx={{mt:1, mb:1}} variant="h2" fontWeight="bold">New Product</Typography>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography sx={{ mt: 1, mb: 1 }} variant="h2" fontWeight="bold">
+              New Product
+            </Typography>
             <IconButton onClick={handleCloseModal}>
               <CloseIcon />
             </IconButton>
@@ -238,8 +293,8 @@ const Contacts = () => {
             sx={{ marginTop: "0px" }}
           />
           <Select
-            value={selectedProduct}
-            onChange={(e) => setSelectedProduct(e.target.value)}
+            value={deleteProduct}
+            onChange={(e) => setDeleteProduct(e.target.value)}
             label="Role"
             fullWidth
             displayEmpty
@@ -278,32 +333,49 @@ const Contacts = () => {
       {/* Modal para editar producto */}
       <Dialog open={openEditModal} onClose={handleCloseEditModal}>
         <DialogTitle>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography sx={{mt:1, mb:1}} variant="h2" fontWeight="bold">Edit Product</Typography>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography sx={{ mt: 1, mb: 1 }} variant="h2" fontWeight="bold">
+              Edit Product
+            </Typography>
             <IconButton onClick={handleCloseEditModal}>
               <CloseIcon />
             </IconButton>
           </Box>
         </DialogTitle>
         <Box p={3}>
-          {/* Agrega aquí los campos y controles para editar el producto */}
+          {/* Campos para editar el producto */}
           <TextField
             label="Name"
             variant="outlined"
             fullWidth
             margin="normal"
-            sx={{ marginTop: "0px" }}
+            value={editedProduct?.nombre || ""}
+            onChange={(e) =>
+              setEditedProduct({ ...editedProduct, nombre: e.target.value })
+            }
           />
           <TextField
             label="Description"
             variant="outlined"
             fullWidth
             margin="normal"
-            sx={{ marginTop: "0px" }}
+            value={editedProduct?.descripcion || ""}
+            onChange={(e) =>
+              setEditedProduct({
+                ...editedProduct,
+                descripcion: e.target.value,
+              })
+            }
           />
           <Select
-            value={selectedProduct}
-            onChange={(e) => setSelectedProduct(e.target.value)}
+            value={editedProduct?.rol || ""}
+            onChange={(e) =>
+              setEditedProduct({ ...editedProduct, rol: e.target.value })
+            }
             label="Role"
             fullWidth
             displayEmpty
@@ -315,16 +387,19 @@ const Contacts = () => {
             <MenuItem value="" disabled>
               Role
             </MenuItem>
-            <MenuItem value="role1">Cortador</MenuItem>
-            <MenuItem value="role2">Ensamblador</MenuItem>
-            <MenuItem value="role3">Guarnecedor</MenuItem>
+            <MenuItem value="cortador">Cortador</MenuItem>
+            <MenuItem value="ensamblador">Ensamblador</MenuItem>
+            <MenuItem value="guarnecedor">Guarnecedor</MenuItem>
           </Select>
           <TextField
             label="Price"
             variant="outlined"
             fullWidth
             margin="normal"
-            sx={{ marginTop: "0px" }}
+            value={editedProduct?.precio || ""}
+            onChange={(e) =>
+              setEditedProduct({ ...editedProduct, precio: e.target.value })
+            }
           />
           <Box display="flex" justifyContent="center" mt={2}>
             <Button
@@ -339,14 +414,19 @@ const Contacts = () => {
       </Dialog>
 
       {/* Modal de confirmación de eliminación */}
-      <Dialog open={openDeleteConfirmation} onClose={handleCloseDeleteConfirmation}>
+      <Dialog
+        open={openDeleteConfirmation}
+        onClose={handleCloseDeleteConfirmation}
+      >
         <DialogTitle>
           <Box
             display="flex"
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography fontWeight="bold" variant="h4">Confirm Deletion</Typography>
+            <Typography fontWeight="bold" variant="h4">
+              Confirm Deletion
+            </Typography>
             <IconButton onClick={handleCloseDeleteConfirmation}>
               <CloseIcon />
             </IconButton>

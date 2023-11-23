@@ -6,7 +6,7 @@ const KEY_TOKEN = 'jwtToken';
 const authService = {
   login: async (credentials) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/login/4`, {
+      const response = await fetch(`${API_BASE_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
