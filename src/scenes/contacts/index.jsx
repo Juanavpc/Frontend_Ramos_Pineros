@@ -19,6 +19,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import productService from "../../services/productService";
 import { useState, useEffect } from "react";
+import authService from "../../services/authService";
 
 const Contacts = () => {
   const theme = useTheme();
@@ -35,15 +36,34 @@ const Contacts = () => {
     precio: 0,
   });
   const [deleteProduct, setDeleteProduct] = useState(0);
+  const [newProductName, setNewProductName] = useState("");
+  const [newProductDescription, setNewProductDescription] = useState("");
+  const [newProductRole, setNewProductRole] = useState("");
+  const [newProductPrice, setNewProductPrice] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);      //estado para controlar si el usuario es administrador o no
+
+
 
   useEffect(() => {
+    const userRole = authService.getUserData();
+    setIsAdmin(userRole === "administrador");
     loadProducts();
   }, []);
 
   const loadProducts = async () => {
     try {
       const productList = await productService.getProducts();
-      setProducts(productList);
+      console.log("Original productList:", productList);
+      if(authService.getUserData()==="administrador"){
+        setProducts(productList);
+      }else{
+        const filteredProducts = productList.filter((product) => {
+          // Asegúrate de ajustar la lógica de acuerdo a tu estructura de datos
+          return product.rol === authService.getUserData();
+        });
+        console.log("Filtered productList:", filteredProducts);
+        setProducts(filteredProducts);
+      }      
     } catch (error) {
       console.error("Error loading products:", error.message);
     }
@@ -79,10 +99,26 @@ const Contacts = () => {
     setOpenModal(false);
   };
 
-  const handleCreateProduct = () => {
-    // Aquí deberías implementar la lógica para crear un nuevo producto
-    console.log("New Product created!");
-    handleCloseModal();
+  const handleCreateProduct = async () => {
+    try {
+      // Crear un objeto con la información del nuevo producto
+      const newProductData = {
+        nombre: newProductName,
+        descripcion: newProductDescription,
+        rol: newProductRole,
+        precio: newProductPrice,
+      };
+
+      // Llamar a la función addProduct del productService para agregar el nuevo producto
+      const addedProductResponse = await productService.addProduct(newProductData);
+      console.log("Product created:", addedProductResponse);
+
+      // Cerrar el modal y recargar la lista de productos
+      handleCloseModal();
+      loadProducts();
+    }catch(error){
+      console.error('Error creating product:', error.message);
+    }
   };
 
   const handleCloseEditModal = () => {
@@ -115,9 +151,6 @@ const Contacts = () => {
     setOpenDeleteConfirmation(false);
   };
 
-
-  // Asumiendo que tienes la información del rol del usuario en el contexto
-  const userRole = "admin"; // Reemplaza esto con la obtención real del rol del usuario
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
@@ -157,7 +190,7 @@ const Contacts = () => {
       headerAlign: "left",
       align: "left",
     },
-    {
+    isAdmin && {
       field: "action",
       headerName: "Action",
       flex: 1,
@@ -209,7 +242,7 @@ const Contacts = () => {
         title="PRODUCTS"
         subtitle="List of products for Future Reference"
       />
-      {userRole === "admin" && ( // Mostrar el botón solo si el usuario es administrador
+      {authService.getUserData() == "administrador" && ( // Mostrar el botón solo si el usuario es administrador
         <Box mb="20px" display="flex" justifyContent="flex-end">
           <Button
             variant="contained"
@@ -282,6 +315,8 @@ const Contacts = () => {
             fullWidth
             margin="normal"
             required
+            value={newProductName}
+            onChange={(e) => setNewProductName(e.target.value)}
             sx={{ marginTop: "0px" }}
           />
           <TextField
@@ -290,11 +325,13 @@ const Contacts = () => {
             fullWidth
             margin="normal"
             required
+            value={newProductDescription}
+            onChange={(e) => setNewProductDescription(e.target.value)}
             sx={{ marginTop: "0px" }}
           />
           <Select
-            value={deleteProduct}
-            onChange={(e) => setDeleteProduct(e.target.value)}
+            value={newProductRole}
+            onChange={(e) => setNewProductRole(e.target.value)}
             label="Role"
             fullWidth
             displayEmpty
@@ -306,9 +343,9 @@ const Contacts = () => {
             <MenuItem value="" disabled>
               Role
             </MenuItem>
-            <MenuItem value="role1">Cortador</MenuItem>
-            <MenuItem value="role2">Ensamblador</MenuItem>
-            <MenuItem value="role3">Guarnecedor</MenuItem>
+            <MenuItem value="cortador">Cortador</MenuItem>
+            <MenuItem value="ensamblador">Ensamblador</MenuItem>
+            <MenuItem value="guarnecedor">Guarnecedor</MenuItem>
           </Select>
           <TextField
             label="Price"
@@ -316,6 +353,8 @@ const Contacts = () => {
             fullWidth
             margin="normal"
             required
+            value={newProductPrice}
+            onChange={(e) => setNewProductPrice(e.target.value)}
             sx={{ marginTop: "0px" }}
           />
           <Box display="flex" justifyContent="center" marginTop="12px">

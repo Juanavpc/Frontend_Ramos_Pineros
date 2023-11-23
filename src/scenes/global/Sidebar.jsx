@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
@@ -10,6 +10,7 @@ import WidgetsIcon from '@mui/icons-material/Widgets';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
 import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+import authService from "../../services/authService";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -34,6 +35,13 @@ const Sidebar = () => {
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const userRole = authService.getUserData();
+    setIsAdmin(userRole === "administrador");
+  }, []);
+  
 
   return (
     <Box
@@ -126,13 +134,15 @@ const Sidebar = () => {
             >
               Data
             </Typography>
-            <Item
-              title="Users"
-              to="/team"
-              icon={<PeopleOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
+            {isAdmin && (
+              <Item
+                title="Users"
+                to="/team"
+                icon={<PeopleOutlinedIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+            )}
             <Item
               title="Products"
               to="/contacts"
