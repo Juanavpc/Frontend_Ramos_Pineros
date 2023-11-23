@@ -35,11 +35,12 @@ const Sidebar = () => {
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [userData, setUserData] = useState({ name: "", role: "" });
+  const isAdmin = userData.role === "administrador";
 
   useEffect(() => {
-    const userRole = authService.getUserData();
-    setIsAdmin(userRole === "administrador");
+    const useData = authService.getUserData();
+    setUserData({ name: useData.nombre, role: useData.rol });
   }, []);
   
 
@@ -81,8 +82,8 @@ const Sidebar = () => {
                 alignItems="center"
                 ml="15px"
               >
-                <Typography variant="h3" color={colors.grey[100]}>
-                  User Admin
+                <Typography variant="h4" color={colors.grey[100]}>
+                {`User ${userData.role}`}
                 </Typography>
                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
                   <MenuOutlinedIcon />
@@ -104,12 +105,12 @@ const Sidebar = () => {
               </Box>
               <Box textAlign="center">
                 <Typography
-                  variant="h2"
+                  variant="h4"
                   color={colors.grey[100]}
                   fontWeight="bold"
                   sx={{ m: "10px 0 0 0" }}
                 >
-                  Ed Roh
+                  {userData.name}
                 </Typography>
                 <Typography variant="h5" color={colors.greenAccent[500]}>
                   JVPayRoll

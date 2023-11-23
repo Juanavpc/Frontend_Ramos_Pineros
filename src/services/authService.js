@@ -71,6 +71,7 @@ const authService = {
 
   getUserData: () => {
     const userDataString = localStorage.getItem('userData');
+    console.log(userDataString)
     return userDataString ? JSON.parse(userDataString) : null;
   },
 
