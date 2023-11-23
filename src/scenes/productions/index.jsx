@@ -76,12 +76,11 @@ const Productions = () => {
         setProducts(productList);
       }else{
         const filteredProducts = productList.filter((product) => {
-          // Asegúrate de ajustar la lógica de acuerdo a tu estructura de datos
-          return product.rol === authService.getUserData();
+          console.log(product.rol)
+          return product.rol == authService.getUserData().rol;
         });
         console.log("Filtered productList:", filteredProducts);
         setProducts(filteredProducts);
-        console.log(products)
       }      
     } catch (error) {
       console.error("Error loading products:", error.message);
@@ -246,7 +245,7 @@ const Productions = () => {
         title="PRODUCTIONS"
         subtitle="List of productions for Future Reference"
       />
-      {userRole !== "admin" && ( // Mostrar el botón solo si el usuario no es administrador
+      {authService.getUserData().rol != "administrador" && ( // Mostrar el botón solo si el usuario no es administrador
         <Box mb="20px" display="flex" justifyContent="flex-end">
           <Button
             variant="contained"
@@ -369,25 +368,31 @@ const Productions = () => {
           />
           <Select
             value={form.detalle.id_producto}
-            onChange={(e) => handleInputChange('detalle', 'id_producto', parseInt(e.target.value, 10) || 0)}
-            label="Product"
-            fullWidth
-            displayEmpty
-            margin="normal"
-            variant="outlined"
-            required
-            sx={{ marginBottom: "8px" }}
-          >
-            <MenuItem value="" disabled>
-              Product
-            </MenuItem>
-            {products.map((product) => (
-              
-              <MenuItem key={product.id} value={product.id}>
-                {product.name}
-              </MenuItem>
-            ))}
+                onChange={(e) => handleInputChange('detalle', 'id_producto', parseInt(e.target.value, 10) || 0)}
+                label="Product"
+                fullWidth
+                displayEmpty
+                margin="normal"
+                variant="outlined"
+                required
+                sx={{ marginBottom: "8px" }}
+              >
+                <MenuItem value="" disabled>
+                  Product
+                </MenuItem>
+                {products.length > 0 ? (
+                  products.map((product) => (
+                    <MenuItem key={product.id} value={product.id}>
+                      {product.name}
+                    </MenuItem>
+                  ))
+                ) : (
+                  <MenuItem value="" disabled>
+                    No products available
+                  </MenuItem>
+                )}
           </Select>
+
           <Box display="flex" justifyContent="center" marginTop="12px">
             <Button
               variant="contained"
