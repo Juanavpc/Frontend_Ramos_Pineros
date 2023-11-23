@@ -34,10 +34,6 @@ const CreateAccount = () => {
             password: form.password,
             rol: form.rol,
           });
-    
-          
-          console.log('Registro exitoso:', response);
-    
           
           navigate("/login");
         } catch (error) {
@@ -47,9 +43,7 @@ const CreateAccount = () => {
 
     const handleLogin = (e) => {
         e.preventDefault();
-        console.log(form);
-
-        
+      
         setForm({
             nombre: '',
             email: '',

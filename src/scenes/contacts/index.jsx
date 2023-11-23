@@ -53,7 +53,6 @@ const Contacts = () => {
   const loadProducts = async () => {
     try {
       const productList = await productService.getProducts();
-      console.log("Original productList:", productList);
       if(authService.getUserData().rol==="administrador"){
         setProducts(productList);
       }else{
@@ -61,7 +60,7 @@ const Contacts = () => {
           // Asegúrate de ajustar la lógica de acuerdo a tu estructura de datos
           return product.rol === authService.getUserData().rol;
         });
-        console.log("Filtered productList:", filteredProducts);
+       
         setProducts(filteredProducts);
       }      
     } catch (error) {
@@ -70,21 +69,16 @@ const Contacts = () => {
   };
 
   const handleEditProductClick = (productId) => {
-    console.log(productId)
     const productToEdit = products.find((product) => product.id === productId);
-    console.log(productToEdit)
     setEditedProduct(productToEdit);
     setOpenEditModal(true);
   };
   const handleEditProduct = async () => {
     try {
-      console.log(editedProduct)
       const editedProductResponse = await productService.editProduct(
         editedProduct
       );
-      console.log("Product edited:", editedProductResponse);
       handleCloseEditModal();
-      // Actualiza la lista de productos después de la edición
       loadProducts();
     } catch (error) {
       console.error('Error editing product:', error.message);
@@ -101,19 +95,14 @@ const Contacts = () => {
 
   const handleCreateProduct = async () => {
     try {
-      // Crear un objeto con la información del nuevo producto
       const newProductData = {
         nombre: newProductName,
         descripcion: newProductDescription,
         rol: newProductRole,
         precio: newProductPrice,
       };
-
-      // Llamar a la función addProduct del productService para agregar el nuevo producto
       const addedProductResponse = await productService.addProduct(newProductData);
-      console.log("Product created:", addedProductResponse);
 
-      // Cerrar el modal y recargar la lista de productos
       handleCloseModal();
       loadProducts();
     }catch(error){
@@ -126,17 +115,14 @@ const Contacts = () => {
   };
 
   const handleDeleteProductClick = (productId) => {
-    console.log(productId);
-    setDeleteProduct(productId); // Almacena el ID del producto seleccionado
+    setDeleteProduct(productId); 
     setOpenDeleteConfirmation(true);
   };
   const handleDeleteProduct = async () => {
     try {
-      console.log("Deleting product:", deleteProduct);
       const deleteProductResponse = await productService.deleteProduct(
         deleteProduct
       );
-      console.log("Product edited:", deleteProductResponse);
       handleCloseEditModal();
 
       loadProducts();

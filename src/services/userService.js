@@ -54,7 +54,6 @@ const userService = {
 
   deleteUser: async (userId) => {
     try {
-      console.log(JSON.stringify({ id: userId }))
       const token = localStorage.getItem(KEY_TOKEN);
 
       const response = await fetch(`${API_BASE_URL}/usuarios`, {

@@ -21,13 +21,11 @@ const authService = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.log(error)
       throw new Error("Error al procesar la solicitud de inicio de sesión");
     }
   },
   register: async (userData) => {
     try {
-      console.log(JSON.stringify(userData))
       const response = await fetch(`${API_BASE_URL}/nuevousuario`, {
         method: 'POST',
         headers: {
@@ -71,7 +69,6 @@ const authService = {
 
   getUserData: () => {
     const userDataString = localStorage.getItem('userData');
-    console.log(userDataString)
     return userDataString ? JSON.parse(userDataString) : null;
   },
 

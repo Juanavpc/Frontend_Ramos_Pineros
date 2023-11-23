@@ -71,7 +71,6 @@ const productService = {
   },
   editProduct: async (editedProduct) => {
     try {
-      console.log(editedProduct)
       const token = localStorage.getItem('jwtToken');
       const response = await fetch(`${API_BASE_URL}/productos`, {
         method: "PUT",

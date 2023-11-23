@@ -31,27 +31,21 @@ const Team = () => {
   const loadUsers = async () => {
     try {
       const userList = await userService.getUsers();
-      console.log(userList)
       setUsers(userList);
-      console.log(authService.getUserData())
     } catch (error) {
       console.error('Error loading users:', error.message);
     }
   };
 
   const handleEditUserClick = (userId) => {
-    console.log(userId)
     const userToEdit = users.find((user) => user.id === userId);
-    console.log(userToEdit)
     setEditedUser(userToEdit);
     setOpenEditModal(true);
   };
 
   const handleEditUser = async () => {
     try {
-      console.log(editedUser)
       const editedUserResponse = await userService.editUser(editedUser);
-      console.log("User edited:", editedUserResponse);
       handleCloseEditModal();
       loadUsers();
     } catch (error) {
@@ -66,15 +60,12 @@ const Team = () => {
 
   const handleDeleteUserClick = (user) => {
     setSelectedUser(user);
-    console.log("ID del usuario a eliminar:", user.id);
     setOpenDeleteConfirmation(true);
   };
   const handleDeleteUser = async () => {
     try {
-      console.log("ID del usuario a eliminar:", selectedUser);
       const response = await userService.deleteUser(selectedUser);
-      console.log("Usuario eliminado:", response);
-      loadUsers();  // Actualiza la lista de usuarios después de eliminar uno
+      loadUsers();  
       handleCloseDeleteConfirmation();
     } catch (error) {
       console.error("Error al eliminar el usuario:", error.message);

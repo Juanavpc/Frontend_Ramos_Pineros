@@ -21,7 +21,6 @@ function App() {
   useEffect(() => {
     setIsLoggedIn(authService.isAuthenticated());
   }, []); 
-  console.log("isLoggedIn", isLoggedIn )
 
   return (
     <ColorModeContext.Provider value={colorMode}>
@@ -32,7 +31,7 @@ function App() {
           <main className="content">
             {isLoggedIn && <Topbar setIsSidebar={setIsSidebar} />} {/* Mostrar la barra superior solo si está autenticado */}
             <Routes>
-              {/* Rutas accesibles solo para usuarios autenticados */}
+              
               {isLoggedIn ? (
                 <>
                   <Route path="/" element={<Dashboard />} />

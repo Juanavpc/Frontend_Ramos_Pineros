@@ -27,6 +27,29 @@ const productionService = {
       throw new Error(`Error en la solicitud de producciones: ${error.message}`);
     }
   },
+  getDetalleProductions:async () => {
+    try {
+      const token = localStorage.getItem(KEY_TOKEN);
+      const response = await fetch(`${API_BASE_URL}/detproduccion`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al obtener el detalle de producciones');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error(error);
+      throw new Error(`Error en la solicitud de producciones: ${error.message}`);
+    }
+  },
 
   createProduction: async (productionData) => {
     try {

@@ -13,6 +13,7 @@ import { useState,useEffect } from "react";
 import productionService from "../../services/productionService";
 import productService from "../../services/productService";
 import authService from "../../services/authService";
+import { async } from "q";
 
 
 const Productions = () => {
@@ -23,14 +24,14 @@ const Productions = () => {
   const [selectedProduction, setSelectedProduction] = useState("");
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
   const [openNewConfirmation, setOpenNewConfirmation] = useState(false);
-  // Asumiendo que tienes la información del rol del usuario en el contexto
-  const userRole = "cortador"; // Reemplaza esto con la obtención real del rol del usuario
+  const userRole = "cortador";
   const [products, setProducts] = useState([]);
+  const [reload, setReload]=useState()
   const [productions, setProductions] = useState([]);
   const [form, setForm] = useState(
     {
       produccion:{
-        id_usuario:0, 
+        id_usuario:authService.getUserData().id, 
         cantidad: 0
       },
       detalle:{
@@ -38,13 +39,16 @@ const Productions = () => {
         nombre:""
       }
     }
-)
+  );
+  const [detProductions, setDetProductions]=useState([]);
+  const [detProductionsFilter, setDetProductionsFilter]=useState([]);
 
   useEffect(() => {
     loadProductions();
     loadProducts();
+    loadDetProductions();
 
-  }, []);
+  }, [reload]);
 
   const handleInputChange = (section, property, value) => {
     setForm((prevForm) => ({
@@ -54,15 +58,12 @@ const Productions = () => {
         [property]: value,
       },
     }));
-    console.log(form)
   };
 
   const loadProductions = async () => {
     try {
       const productionList = await productionService.getProductions();
-      console.log(productionList)
       setProductions(productionList);
-      console.log(productionService.getProductions())
     } catch (error) {
       console.error('Error loading users:', error.message);
     }
@@ -71,17 +72,25 @@ const Productions = () => {
   const loadProducts = async () => {
     try {
       const productList = await productService.getProducts();
-      console.log("Original productList:", productList);
       if(authService.getUserData()==="administrador"){
         setProducts(productList);
       }else{
         const filteredProducts = productList.filter((product) => {
-          console.log(product.rol)
+         
           return product.rol == authService.getUserData().rol;
         });
-        console.log("Filtered productList:", filteredProducts);
         setProducts(filteredProducts);
       }      
+    } catch (error) {
+      console.error("Error loading products:", error.message);
+    }
+  };
+
+  const loadDetProductions = async () => {
+    try {
+      const detProductionsList = await productionService.getDetalleProductions();
+      setDetProductions(detProductionsList)
+      
     } catch (error) {
       console.error("Error loading products:", error.message);
     }
@@ -95,19 +104,28 @@ const Productions = () => {
     setOpenNewConfirmation(false);
   };
 
-  const handleCreateProduction = () => {
-    // Aquí deberías implementar la lógica para crear un nuevo producto
-    console.log("New Production created!");
-    handleCloseNewModal();
+  const handleCreateProduction = async() => {
+    try {
+      const addNewProduction= await productionService.createProduction(form)
+      handleCloseNewModal();
+
+      handleCloseModal();
+      loadProductions();
+    }catch(error){
+      console.error('Error creating product:', error.message);
+    }finally{
+      setReload(true)
+    }
+  
   };
 
-  const handleVisibilityClick = () => {
+  const handleVisibilityClick = (idProduction) => {
+    const filteredDetProductions = detProductions.filter((detproduction) => {
+      // Asegúrate de ajustar la lógica de acuerdo a tu estructura de datos
+      return detproduction.id_produccion === idProduction;
+    });
+    setDetProductionsFilter(filteredDetProductions);
     setOpenModal(true);
-    if (userRole !== "admin") {
-      setOpenModal(true);
-    } else {
-      // Lógica adicional si es necesario
-    }
   };
 
   const handleCloseModal = () => {
@@ -123,8 +141,7 @@ const Productions = () => {
   };
 
   const handleEditProduction = () => {
-    // Realiza la lógica de edición del producto aquí
-    console.log("Production edited:");
+
     handleCloseEditModal();
   };
 
@@ -137,8 +154,7 @@ const Productions = () => {
   };
 
   const handleDeleteProduction = () => {
-    // Realiza la lógica de eliminación del producto aquí
-    console.log("Production deleted:");
+
     handleCloseDeleteConfirmation();
   };
   const columns = [
@@ -180,62 +196,43 @@ const Productions = () => {
       field: "action",
       headerName: "Action",
       flex: 1,
-      renderCell: () => {
-        if (userRole === "admin"){
-          return(
-            <Box
-              width="50%"
-              margin="4px 0 4px 0"
+      renderCell: ({ row: { id } }) => {
+        return (
+          <Box
+            width="100%"
+            height="75%"
+            display="flex"
+            justifyContent="space-around"
+            borderRadius="4px"
+          >
+            {authService.getUserData().rol != "administrador"?<Box
+              width="30%"
               p="5px"
               display="flex"
               justifyContent="center"
               alignItems="center"
               backgroundColor={colors.greenAccent[600]}
               borderRadius="4px"
-              onClick={handleVisibilityClick}
+              onClick={handleDeleteProductionClick}
+              style={{ cursor: "pointer" }}
+            >
+              <DeleteOutlineIcon />
+            </Box>:null}
+            <Box
+              width="30%"
+              p="5px"
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              backgroundColor={colors.greenAccent[600]}
+              borderRadius="4px"
+              onClick={()=>{handleVisibilityClick(id)}}
               style={{ cursor: "pointer" }}
             >
               <VisibilityIcon />
             </Box>
-          );
-        }else{
-          return (
-            <Box
-              width="100%"
-              height="75%"
-              display="flex"
-              justifyContent="space-around"
-              borderRadius="4px"
-            >
-              <Box
-                width="30%"
-                p="5px"
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                backgroundColor={colors.greenAccent[600]}
-                borderRadius="4px"
-                onClick={handleDeleteProductionClick}
-                style={{ cursor: "pointer" }}
-              >
-                <DeleteOutlineIcon />
-              </Box>
-              <Box
-                width="30%"
-                p="5px"
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                backgroundColor={colors.greenAccent[600]}
-                borderRadius="4px"
-                onClick={handleVisibilityClick}
-                style={{ cursor: "pointer" }}
-              >
-                <VisibilityIcon />
-              </Box>
-            </Box>
-          );
-        }
+          </Box>
+        );
       },
     },
   ];
@@ -297,7 +294,6 @@ const Productions = () => {
         />
       </Box>
 
-      {/* Modal para visualizar una produccion (User Admin)*/}
       <Dialog open={openModal} onClose={handleCloseModal}>
         <DialogTitle>
           <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -307,7 +303,6 @@ const Productions = () => {
             </IconButton>
           </Box>
         </DialogTitle>
-        {/* Contenido de la tabla dentro del modal */}
         <Box p={3} width={600} maxHeight={400} overflow="auto">
           <TableContainer>
             <Table>
@@ -315,18 +310,24 @@ const Productions = () => {
                 <TableRow>
                   <TableCell>ID</TableCell>
                   <TableCell>Product</TableCell>
-                  <TableCell>Quantity</TableCell>
+                  <TableCell>Name</TableCell>
                   <TableCell>Date</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {/* Aquí deberías mapear tus datos y renderizar filas */}
-                <TableRow>
-                  <TableCell>1</TableCell>
-                  <TableCell>Product A</TableCell>
-                  <TableCell>10</TableCell>
-                  <TableCell>2023-01-01</TableCell>
-                </TableRow>
+                {
+
+                  detProductionsFilter.map((detalle)=>(
+                    <TableRow key={detalle.id} value={detalle.id}>
+                      <TableCell>{detalle.id}</TableCell>
+                      <TableCell>{detalle.id_producto}</TableCell>
+                      <TableCell>{detalle.nombre}</TableCell>
+                      <TableCell>{detalle.fecha}</TableCell>
+                    </TableRow>
+
+                  ))
+                }
+         
               </TableBody>
             </Table>
           </TableContainer>
@@ -383,7 +384,7 @@ const Productions = () => {
                 {products.length > 0 ? (
                   products.map((product) => (
                     <MenuItem key={product.id} value={product.id}>
-                      {product.name}
+                      {product.nombre}
                     </MenuItem>
                   ))
                 ) : (

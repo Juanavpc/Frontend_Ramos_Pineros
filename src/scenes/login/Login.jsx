@@ -17,9 +17,7 @@ const Login = () => {
 
     
     const handleInputChange = (e) => {
-      console.log(e.target)
         const { name, value } = e.target;
-        console.log(name, value)
         setCredentials((prevCredentials) => ({
           ...prevCredentials,
           [name]: value,
@@ -29,10 +27,7 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            console.log(credentials)
           const response = await authService.login(credentials);
-          console.log("Usuario autenticado:", response);
-          console.log(response.payload.rol)
           authService.saveUserData({rol:response.payload.rol, nombre: response.payload.nombre, id:response.payload.id});
           authService.saveToken(response.idToken);
           navigate('/');
