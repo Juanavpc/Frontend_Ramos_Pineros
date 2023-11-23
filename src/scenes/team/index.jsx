@@ -1,15 +1,14 @@
 import { Box, Typography, useTheme, Button, Dialog, DialogTitle, IconButton, TextField, Select, MenuItem } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import { mockDataTeam } from "../../data/mockData";
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditIcon from '@mui/icons-material/Edit';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import Header from "../../components/Header";
 import { useState,useEffect } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import userService from '../../services/userService';
-import authService from '../../services/authService';
+import authService from "../../services/authService";
+
 
 const Team = () => {
   const theme = useTheme();
@@ -19,13 +18,14 @@ const Team = () => {
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
   const [users, setUsers] = useState([]);
   const [selectedRole, setSelectedRole] = useState("");
-  const [idUsers, setIdUsers] = useState({
-    id: "",
+  const [editedUser, setEditedUser] = useState({
+    rol: "",
   });
   
 
   useEffect(() => {
     loadUsers();
+
   }, []);
 
   const loadUsers = async () => {
@@ -33,51 +33,52 @@ const Team = () => {
       const userList = await userService.getUsers();
       console.log(userList)
       setUsers(userList);
+      console.log(authService.getUserData())
     } catch (error) {
       console.error('Error loading users:', error.message);
     }
   };
 
-  const handleEditUserClick = (user) => {
-    setSelectedUser(user);
-    setSelectedRole(user.rol); // Establece el valor inicial del rol seleccionado
+  const handleEditUserClick = (userId) => {
+    console.log(userId)
+    const userToEdit = users.find((user) => user.id === userId);
+    console.log(userToEdit)
+    setEditedUser(userToEdit);
     setOpenEditModal(true);
-  };
-
-  const handleCloseEditModal = () => {
-    setOpenEditModal(false);
   };
 
   const handleEditUser = async () => {
     try {
-      console.log(selectedUser)
-      await userService.editUser(selectedUser.id);
-
+      console.log(editedUser)
+      const editedUserResponse = await userService.editUser(editedUser);
+      console.log("User edited:", editedUserResponse);
       handleCloseEditModal();
       loadUsers();
     } catch (error) {
       console.error('Error editing user:', error.message);
     }
   };
-  
-  const handleDeleteUser = async (e) => {
-    e.preventDefault();
+
+  const handleCloseEditModal = () => {
+    setOpenEditModal(false);
+  };
+
+
+  const handleDeleteUserClick = (user) => {
+    setSelectedUser(user);
+    console.log("ID del usuario a eliminar:", user.id);
+    setOpenDeleteConfirmation(true);
+  };
+  const handleDeleteUser = async () => {
     try {
-      console.log("ID del usuario a eliminar:", idUsers.id);
-      const response = await userService.deleteUser(idUsers.id);
+      console.log("ID del usuario a eliminar:", selectedUser);
+      const response = await userService.deleteUser(selectedUser);
       console.log("Usuario eliminado:", response);
       loadUsers();  // Actualiza la lista de usuarios después de eliminar uno
       handleCloseDeleteConfirmation();
     } catch (error) {
       console.error("Error al eliminar el usuario:", error.message);
     }
-  };
-
-  const handleDeleteUserClick = (user) => {
-    setSelectedUser(user);
-    setIdUsers({id: user.id})
-    console.log("ID del usuario a eliminar:", user.id);
-    setOpenDeleteConfirmation(true);
   };
 
   const handleCloseDeleteConfirmation = () => {
@@ -121,7 +122,7 @@ const Team = () => {
       field: "action",
       headerName: "Action",
       flex: 1,
-      renderCell: ({ row }) => {
+      renderCell: ({ row: { id }}) => {
         return (
           <Box
             width="100%"
@@ -138,7 +139,7 @@ const Team = () => {
               alignItems="center"
               backgroundColor={colors.greenAccent[600]}
               borderRadius="4px"
-              onClick={handleDeleteUserClick}
+              onClick={()=>{handleDeleteUserClick(id)}}
               style={{ cursor: "pointer" }}
             >
               <DeleteOutlineIcon />
@@ -151,7 +152,7 @@ const Team = () => {
               alignItems="center"
               backgroundColor={colors.greenAccent[600]}
               borderRadius="4px"
-              onClick={() => handleEditUserClick(row)}
+              onClick={() => handleEditUserClick(id)}
               style={{ cursor: "pointer" }}
             >
               <EditIcon />
@@ -213,8 +214,10 @@ const Team = () => {
         <Box p={3}>
           {/* Formulario para editar un usuario */}
           <Select
-            value={selectedRole}
-            onChange={(e) => setSelectedRole(e.target.value)}
+            value={editedUser?.rol}
+            onChange={(e) =>
+              setEditedUser({ ...editedUser, rol: e.target.value })
+            }
             label="Role"
             fullWidth
             displayEmpty
@@ -255,7 +258,7 @@ const Team = () => {
       </DialogTitle>
       <Box p={3}>
         <Typography>
-          Are you sure you want to delete the selected user ID:{idUsers.id}? 
+          Are you sure you want to delete the selected user ID:{selectedUser}? 
         </Typography>
         <Box display="flex" justifyContent="center" marginTop="15px">
           <Button

@@ -32,6 +32,8 @@ const Login = () => {
             console.log(credentials)
           const response = await authService.login(credentials);
           console.log("Usuario autenticado:", response);
+          console.log(response.payload.rol)
+          authService.saveUserData(response.payload.rol);
           authService.saveToken(response.idToken);
           navigate('/');
          

@@ -64,6 +64,20 @@ const authService = {
     const token = localStorage.getItem(KEY_TOKEN);
     return !!token;
   },
+  saveUserData: (userData) => {
+    localStorage.setItem('userData', JSON.stringify(userData));
+    window.dispatchEvent(new Event('storage')); // Disparar evento de cambio en el almacenamiento
+  },
+
+  getUserData: () => {
+    const userDataString = localStorage.getItem('userData');
+    return userDataString ? JSON.parse(userDataString) : null;
+  },
+
+  clearUserData: () => {
+    localStorage.removeItem('userData');
+    window.dispatchEvent(new Event('storage')); // Disparar evento de cambio en el almacenamiento
+  },
 };
 
 export default authService;

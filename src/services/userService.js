@@ -27,11 +27,11 @@ const userService = {
     }
   },
 
-  editUser: async (userId, userData) => {
+  editUser: async (userData) => {
     try {
       const token = localStorage.getItem(KEY_TOKEN);
 
-      const response = await fetch(`${API_BASE_URL}/usuarios/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/usuarios`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -54,14 +54,16 @@ const userService = {
 
   deleteUser: async (userId) => {
     try {
+      console.log(JSON.stringify({ id: userId }))
       const token = localStorage.getItem(KEY_TOKEN);
 
       const response = await fetch(`${API_BASE_URL}/usuarios`, {
         method: 'DELETE',
         headers: {
+          "Content-Type": "application/json",
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ id: userId }),
       });
 
       if (!response.ok) {

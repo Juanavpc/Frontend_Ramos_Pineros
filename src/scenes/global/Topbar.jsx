@@ -16,17 +16,13 @@ const Topbar = () => {
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(authService.isAuthenticated());
 
-  useEffect(() => {
-    setIsLoggedIn(authService.isAuthenticated());
-  }, []); 
 
 
   const handleLogout = () => {
-    authService.removeToken();
-    setIsLoggedIn(false); // Actualiza manualmente el estado después del cierre de sesión
+    authService.removeToken(); // Actualiza manualmente el estado después del cierre de sesión
     navigate('/login');
+    authService.clearUserData()
   };
 
 
@@ -53,7 +49,7 @@ const Topbar = () => {
             <LightModeOutlinedIcon />
           )}
         </IconButton>
-        <IconButton onClick={() => { authService.removeToken(); navigate("/login"); }}>
+        <IconButton onClick={ handleLogout }>
           <LogoutIcon />
         </IconButton>
       </Box>
