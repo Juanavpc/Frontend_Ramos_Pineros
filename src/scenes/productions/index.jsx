@@ -24,7 +24,6 @@ const Productions = () => {
   const [selectedProduction, setSelectedProduction] = useState("");
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
   const [openNewConfirmation, setOpenNewConfirmation] = useState(false);
-  const userRole = "cortador";
   const [products, setProducts] = useState([]);
   const [reload, setReload]=useState()
   const [productions, setProductions] = useState([]);
@@ -42,6 +41,7 @@ const Productions = () => {
   );
   const [detProductions, setDetProductions]=useState([]);
   const [detProductionsFilter, setDetProductionsFilter]=useState([]);
+  const [packageToDeleteId, setPackageId] = useState();
 
   useEffect(() => {
     loadProductions();
@@ -77,7 +77,7 @@ const Productions = () => {
       }else{
         const filteredProducts = productList.filter((product) => {
          
-          return product.rol == authService.getUserData().rol;
+          return product.rol === authService.getUserData().rol;
         });
         setProducts(filteredProducts);
       }      
@@ -145,7 +145,8 @@ const Productions = () => {
     handleCloseEditModal();
   };
 
-  const handleDeleteProductionClick = () => {
+  const handleDeleteProductionClick = (idProduction) => {
+    setPackageId(idProduction);
     setOpenDeleteConfirmation(true);
   };
 
@@ -153,14 +154,37 @@ const Productions = () => {
     setOpenDeleteConfirmation(false);
   };
 
-  const handleDeleteProduction = () => {
+  const handleDeleteProduction = async () => {
+    try {
+      // Antes de eliminar la producción, elimina sus detalles
+      const productionId = packageToDeleteId
+      console.log("Production Id:", productionId)
+      const details = await productionService.getDetalleProductions();
+      const productionDetails = details.filter(detail => detail.id_produccion === productionId);
+      console.log("productionDetails", productionDetails)
+      // Eliminar cada detalle de la producción
+      for (const detail of productionDetails) {
+        
+        await productionService.deleteDetalleProductions(detail.id);
+        
+      }
 
-    handleCloseDeleteConfirmation();
+      // Después de eliminar los detalles, elimina la producción
+      const deletedProduction = await productionService.deleteProduction(productionId);
+      
+      // Actualiza el estado de las producciones (opcional)
+      setProductions(prevProductions => prevProductions.filter(prod => prod.id !== productionId));
+
+      console.log('Producción eliminada:', deletedProduction);
+      handleCloseDeleteConfirmation();
+    } catch (error) {
+      console.error('Error al eliminar producción:', error.message);
+    }
   };
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
-    ...(userRole === "admin"
-      ? [{ field: "registrarId", headerName: "Id User" }]
+    ...(authService.getUserData().rol === "administrador"
+      ? [{ field: "id_usuario", headerName: "Id User" }]
       : []),
     {
       field: "fecha",
@@ -205,7 +229,7 @@ const Productions = () => {
             justifyContent="space-around"
             borderRadius="4px"
           >
-            {authService.getUserData().rol != "administrador"?<Box
+            {authService.getUserData().rol !== "administrador"?<Box
               width="30%"
               p="5px"
               display="flex"
@@ -213,7 +237,7 @@ const Productions = () => {
               alignItems="center"
               backgroundColor={colors.greenAccent[600]}
               borderRadius="4px"
-              onClick={handleDeleteProductionClick}
+              onClick={()=>{handleDeleteProductionClick(id)}}
               style={{ cursor: "pointer" }}
             >
               <DeleteOutlineIcon />
@@ -242,7 +266,7 @@ const Productions = () => {
         title="PRODUCTIONS"
         subtitle="List of productions for Future Reference"
       />
-      {authService.getUserData().rol != "administrador" && ( // Mostrar el botón solo si el usuario no es administrador
+      {authService.getUserData().rol !== "administrador" && ( // Mostrar el botón solo si el usuario no es administrador
         <Box mb="20px" display="flex" justifyContent="flex-end">
           <Button
             variant="contained"
@@ -308,8 +332,8 @@ const Productions = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Product</TableCell>
+                  <TableCell>Id</TableCell>
+                  <TableCell>Id Product</TableCell>
                   <TableCell>Name</TableCell>
                   <TableCell>Date</TableCell>
                 </TableRow>

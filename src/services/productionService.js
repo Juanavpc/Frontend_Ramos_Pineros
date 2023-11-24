@@ -50,7 +50,29 @@ const productionService = {
       throw new Error(`Error en la solicitud de producciones: ${error.message}`);
     }
   },
+  deleteDetalleProductions: async (detalleProduccionId) => {
+    try {
+      const token = localStorage.getItem(KEY_TOKEN);
+      const response = await fetch(`${API_BASE_URL}/detproduccion`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ id: detalleProduccionId }),
+      });
 
+      if (!response.ok) {
+        throw new Error('Error al eliminar detalles de producción');
+      }
+
+      const deletedDetails = await response.json();
+      return deletedDetails;
+    } catch (error) {
+      console.error(error);
+      throw new Error(`Error al eliminar detalles de producción: ${error.message}`);
+    }
+  },
   createProduction: async (productionData) => {
     try {
       const token = localStorage.getItem(KEY_TOKEN);
@@ -78,6 +100,7 @@ const productionService = {
   deleteProduction: async (productionId) => {
     try {
       const token = localStorage.getItem(KEY_TOKEN);
+      console.log({ id: productionId });
       const response = await fetch(`${API_BASE_URL}/produccion`, {
         method: 'DELETE',
         headers: {
