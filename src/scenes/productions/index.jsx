@@ -111,6 +111,7 @@ const Productions = () => {
 
       handleCloseModal();
       loadProductions();
+      loadDetProductions();
     }catch(error){
       console.error('Error creating product:', error.message);
     }finally{
